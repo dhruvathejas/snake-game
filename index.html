@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐍 Snake Game for Kids</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .game-container {
+            text-align: center;
+            max-width: 800px;
+            padding: 20px;
+        }
+
+        /* Start Screen Styles */
+        .start-screen {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 60px 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border: 5px solid #fff;
+        }
+
+        .game-title {
+            font-size: 4rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 0px #fff;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .snake-emoji {
+            font-size: 5rem;
+            animation: wiggle 3s infinite;
+            display: inline-block;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(5deg); }
+            75% { transform: rotate(-5deg); }
+        }
+
+        .subtitle {
+            font-size: 1.8rem;
+            color: #34495e;
+            margin-bottom: 40px;
+            font-weight: bold;
+        }
+
+        .play-button {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            border: none;
+            border-radius: 50px;
+            padding: 25px 60px;
+            font-size: 2.5rem;
+            color: white;
+            cursor: pointer;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 15px 30px rgba(255, 107, 107, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .play-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(255, 107, 107, 0.6);
+            background: linear-gradient(45deg, #ff5252, #ff7575);
+        }
+
+        .play-button:active {
+            transform: translateY(-2px);
+        }
+
+        .play-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .play-button:hover::before {
+            left: 100%;
+        }
+
+        /* Game Screen Styles (hidden initially) */
+        .game-screen {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .score {
+            background: linear-gradient(45deg, #4ecdc4, #5fd8cf);
+            padding: 10px 20px;
+            border-radius: 20px;
+            color: white;
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+        }
+
+        .game-canvas {
+            border: 5px solid #2c3e50;
+            border-radius: 15px;
+            background: #ecf0f1;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Decorative elements */
+        .decoration {
+            position: absolute;
+            font-size: 2rem;
+            animation: float 6s ease-in-out infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .decoration:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+        .decoration:nth-child(2) { top: 20%; right: 10%; animation-delay: 1s; }
+        .decoration:nth-child(3) { bottom: 20%; left: 15%; animation-delay: 2s; }
+        .decoration:nth-child(4) { bottom: 10%; right: 15%; animation-delay: 3s; }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2.5rem;
+            }
+            
+            .snake-emoji {
+                font-size: 3rem;
+            }
+            
+            .subtitle {
+                font-size: 1.4rem;
+            }
+            
+            .play-button {
+                font-size: 2rem;
+                padding: 20px 40px;
+            }
+            
+            .start-screen {
+                padding: 40px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Decorative floating elements -->
+    <div class="decoration">🍎</div>
+    <div class="decoration">🍌</div>
+    <div class="decoration">🍓</div>
+    <div class="decoration">🍇</div>
+
+    <div class="game-container">
+        <!-- Start Screen -->
+        <div class="start-screen" id="startScreen">
+            <div class="snake-emoji">🐍</div>
+            <h1 class="game-title">Snake Game</h1>
+            <p class="subtitle">Fun for Kids!</p>
+            <button class="play-button" id="playButton">
+                🎮 Play
+            </button>
+        </div>
+
+        <!-- Game Screen (hidden initially) -->
+        <div class="game-screen" id="gameScreen">
+            <div class="game-info">
+                <div class="score">Score: <span id="scoreValue">0</span></div>
+                <div>🐍 Snake Game for Kids</div>
+            </div>
+            <canvas class="game-canvas" id="gameCanvas" width="600" height="400"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Game state management
+        let gameState = 'start'; // 'start', 'playing', 'gameOver'
+        let score = 0;
+
+        // DOM elements
+        const startScreen = document.getElementById('startScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const playButton = document.getElementById('playButton');
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('scoreValue');
+
+        // Game variables
+        const gridSize = 20;
+        const tileCount = canvas.width / gridSize;
+
+        let snake = [
+            { x: 10, y: 10 }
+        ];
+        let food = {};
+        let dx = 0;
+        let dy = 0;
+
+        // Event listeners
+        playButton.addEventListener('click', startGame);
+
+        // Add some fun button interaction
+        playButton.addEventListener('mouseenter', () => {
+            playButton.style.transform = 'translateY(-5px) scale(1.05)';
+        });
+
+        playButton.addEventListener('mouseleave', () => {
+            playButton.style.transform = 'translateY(0) scale(1)';
+        });
+
+        // Start the game
+        function startGame() {
+            gameState = 'playing';
+            startScreen.style.display = 'none';
+            gameScreen.style.display = 'block';
+            
+            // Initialize game
+            initGame();
+            
+            // Start game loop (we'll implement this in the next story)
+            console.log('Game started! 🎮');
+        }
+
+        // Initialize game variables
+        function initGame() {
+            snake = [{ x: 10, y: 10 }];
+            dx = 0;
+            dy = 0;
+            score = 0;
+            scoreElement.textContent = score;
+            generateFood();
+        }
+
+        // Generate food at random position
+        function generateFood() {
+            food = {
+                x: Math.floor(Math.random() * tileCount),
+                y: Math.floor(Math.random() * tileCount)
+            };
+        }
+
+        // Basic canvas setup for next stories
+        function drawGame() {
+            // Clear canvas
+            ctx.fillStyle = '#ecf0f1';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw snake head (basic for now)
+            ctx.fillStyle = '#2ecc71';
+            ctx.fillRect(snake[0].x * gridSize, snake[0].y * gridSize, gridSize - 2, gridSize - 2);
+
+            // Draw food
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 2, gridSize - 2);
+        }
+
+        // Initial draw
+        drawGame();
+
+        // Add some fun console messages
+        console.log('🐍 Welcome to Snake Game for Kids!');
+        console.log('Click the Play button to start your adventure!');
+    </script>
+</body>
+</html>
