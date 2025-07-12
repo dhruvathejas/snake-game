@@ -66,6 +66,9 @@ function updateGame() {
     // Move snake
     moveSnake();
     
+    // Check for food collision
+    checkFoodCollision();
+    
     // Draw everything
     drawGame();
 }
@@ -77,7 +80,8 @@ function moveSnake() {
     // Add new head
     snake.unshift(head);
     
-    // Remove tail (we'll modify this later when eating food)
+    // Remove tail (only if not eating food - we'll handle this in checkFoodCollision)
+    // For now, always remove tail - checkFoodCollision will add it back if needed
     snake.pop();
 }
 
@@ -130,10 +134,54 @@ function changeDirection(event) {
 
 // Generate food at random position
 function generateFood() {
-    food = {
-        x: Math.floor(Math.random() * tileCount),
-        y: Math.floor(Math.random() * tileCount)
-    };
+    // Make sure food doesn't spawn on the snake
+    do {
+        food = {
+            x: Math.floor(Math.random() * tileCount),
+            y: Math.floor(Math.random() * (canvas.height / gridSize))
+        };
+    } while (isOnSnake(food));
+}
+
+// Check if a position is on the snake
+function isOnSnake(position) {
+    return snake.some(segment => segment.x === position.x && segment.y === position.y);
+}
+
+// Check for food collision and handle eating
+function checkFoodCollision() {
+    const head = snake[0];
+    
+    // Check if snake head touches food
+    if (head.x === food.x && head.y === food.y) {
+        // Increase score
+        score += 10;
+        scoreElement.textContent = score;
+        
+        // Add tail segment (snake grows)
+        const tail = { ...snake[snake.length - 1] };
+        snake.push(tail);
+        
+        // Generate new food
+        generateFood();
+        
+        // Add visual feedback
+        console.log(`🍎 Yummy! Score: ${score}`);
+        
+        // Add score animation effect
+        animateScoreIncrease();
+    }
+}
+
+// Animate score increase for visual feedback
+function animateScoreIncrease() {
+    const scoreDiv = document.querySelector('.score');
+    scoreDiv.style.transform = 'scale(1.2)';
+    scoreDiv.style.transition = 'transform 0.2s ease';
+    
+    setTimeout(() => {
+        scoreDiv.style.transform = 'scale(1)';
+    }, 200);
 }
 
 // Enhanced drawing function
@@ -202,13 +250,25 @@ function drawGame() {
         }
     });
 
-    // Draw food as a cute apple
+    // Draw food as a cute apple with more detail
     ctx.fillStyle = '#e74c3c';
-    ctx.fillRect(food.x * gridSize + 1, food.y * gridSize + 1, gridSize - 2, gridSize - 2);
+    const foodX = food.x * gridSize;
+    const foodY = food.y * gridSize;
     
-    // Add a small highlight to make it look more like fruit
+    // Draw apple body
+    ctx.fillRect(foodX + 1, foodY + 1, gridSize - 2, gridSize - 2);
+    
+    // Add apple highlight
     ctx.fillStyle = '#ff6b6b';
-    ctx.fillRect(food.x * gridSize + 2, food.y * gridSize + 2, gridSize - 8, gridSize - 8);
+    ctx.fillRect(foodX + 3, foodY + 3, gridSize - 10, gridSize - 10);
+    
+    // Add apple shine effect
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(foodX + 4, foodY + 4, 4, 4);
+    
+    // Add simple leaf (green dot)
+    ctx.fillStyle = '#27ae60';
+    ctx.fillRect(foodX + gridSize - 6, foodY + 2, 3, 3);
 }
 
 // Initial draw
@@ -218,8 +278,10 @@ drawGame();
 console.log('🐍 Welcome to Snake Game for Kids!');
 console.log('Click the Play button to start your adventure!');
 console.log('Use Arrow Keys or WASD to control the snake!');
-console.log('🎮 Controls:');
+console.log('� Eat the red apples to grow and score points!');
+console.log('�🎮 Controls:');
 console.log('  ↑ W - Move Up');
 console.log('  ↓ S - Move Down');
 console.log('  ← A - Move Left');
 console.log('  → D - Move Right');
+console.log('🎯 Goal: Eat as many apples as you can!');

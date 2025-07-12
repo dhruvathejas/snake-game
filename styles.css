@@ -145,6 +145,11 @@ body {
     border-radius: 20px;
     color: white;
     box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+    transition: transform 0.2s ease;
+}
+
+.score:hover {
+    transform: scale(1.05);
 }
 
 .game-canvas {
